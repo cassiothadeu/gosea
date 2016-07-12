@@ -1,4 +1,4 @@
-# GO Secure Example Application (GOSEA)
+# Go Secure Example Application (GOSEA)
 
 ## Install
 ```
