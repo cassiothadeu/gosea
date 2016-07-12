@@ -1,4 +1,5 @@
 # Go Secure Example Application (GOSEA)
+![Go Secure Example Application Logo](logo.png?raw=true)
 
 ## Install
 ```
