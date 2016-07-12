@@ -8,14 +8,14 @@ func init() {
 		ID:        1,
 		FirstName: "Admin",
 		LastName:  "User",
-		Admin:     true,
+		Roles:     []string{AdministratorRole},
 	}
 
 	user2 := &User{
 		ID:        2,
 		FirstName: "Test",
 		LastName:  "User",
-		Admin:     false,
+		Roles:     []string{},
 	}
 
 	users[user.ID] = user
@@ -27,7 +27,17 @@ type User struct {
 	ID        int
 	FirstName string
 	LastName  string
-	Admin     bool
+	Roles     []string
+}
+
+// HasRole returns true if the user is in the role
+func (u *User) HasRole(roleName string) bool {
+	for _, role := range u.Roles {
+		if role == roleName {
+			return true
+		}
+	}
+	return false
 }
 
 // UserService provides a CRUD interface for Users

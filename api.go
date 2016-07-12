@@ -36,8 +36,10 @@ func NewAPI(certPath, keyPath string) *API {
 }
 
 // Middleware
+
+// getToken is used by jwt-go
 func (a *API) getToken(token *jwt.Token) (interface{}, error) {
-	return []byte("secret"), nil
+	return a.encryptionKey, nil
 }
 
 // Authenticate provides Authentication middleware for handlers
@@ -84,14 +86,21 @@ func (a *API) Authenticate(next http.Handler) http.Handler {
 }
 
 // Authorize provides authorization middleware for our handlers
-func (a *API) Authorize(permissions ...services.Permission) func(http.Handler) http.Handler {
+func (a *API) Authorize(permissions ...services.Permission) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user := context.Get(r, "user").(*services.User)
 
-			if user == nil {
-				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			// TODO: Get User Information from Request
+			user := &services.User{
+				ID:        1,
+				FirstName: "Admin",
+				LastName:  "User",
+				Roles:     []string{services.AdministratorRole},
 			}
+
+			// if user == nil {
+			// 	http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			// }
 
 			for _, permission := range permissions {
 				if err := a.AclService.CheckPermission(user, permission); err != nil {

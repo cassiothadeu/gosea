@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gorilla/context"
 	"github.com/komand/gosea/services"
 )
 
@@ -21,9 +20,12 @@ func NewTokens(s services.TokenService) *Tokens {
 func (t *Tokens) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
-		user, ok := context.Get(req, "user").(*services.User)
-		if !ok {
-			http.Error(w, "Failed to get user from request", http.StatusBadRequest)
+		// TODO: Take in login information
+		user := &services.User{
+			ID:        1,
+			FirstName: "Admin",
+			LastName:  "User",
+			Roles:     []string{services.AdministratorRole},
 		}
 		token, err := t.Service.Get(user)
 		if err != nil {

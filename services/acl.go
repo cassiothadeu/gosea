@@ -1,9 +1,8 @@
 package services
 
-import "errors"
-
-// Permission is a type of permission
-type Permission string
+import (
+	"errors"
+)
 
 // ACLService regulates access control.
 type ACLService interface {
@@ -17,6 +16,19 @@ func NewACLService() ACLService {
 
 type aclService struct{}
 
+// Permission is a type of permission
+type Permission string
+
+//AdministratorRole is an administrator
+var AdministratorRole = "administrator"
+
+// Role is a user role
+type Role struct {
+	Name        string
+	Description string
+	Permissions []Permission
+}
+
 // CheckPermission returns true if the user is a member of a role that has the permission.
 func (a *aclService) CheckPermission(user *User, permission Permission) error {
 	if user == nil {
@@ -27,7 +39,7 @@ func (a *aclService) CheckPermission(user *User, permission Permission) error {
 		return errors.New("CheckPermission: You must supply a valid permission to check against.")
 	}
 
-	if user.Admin {
+	if user.HasRole(AdministratorRole) {
 		// Admins can do anything
 		return nil
 	}
