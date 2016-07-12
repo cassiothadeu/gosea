@@ -1,6 +1,8 @@
 # Go Secure Example Application (GOSEA)
 ![Go Secure Example Application Logo](logo.png?raw=true)
 
+This example application is based on one of our blog posts on web security in Golang.  There is a lot to implement but we hope this example application becomes a living repository for writing secure web applications in Golang.
+
 ## Install
 ```
 make install
