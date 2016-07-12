@@ -8,5 +8,5 @@ Follow the instructions when you are prompted, in order to create a self signed 
 
 ## Run
 ```
-gosea
+make run
 ```
