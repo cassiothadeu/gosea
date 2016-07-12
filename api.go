@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -37,11 +38,6 @@ func NewAPI(certPath, keyPath string) *API {
 
 // Middleware
 
-// getToken is used by jwt-go
-func (a *API) getToken(token *jwt.Token) (interface{}, error) {
-	return a.encryptionKey, nil
-}
-
 // Authenticate provides Authentication middleware for handlers
 func (a *API) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -59,29 +55,34 @@ func (a *API) Authenticate(next http.Handler) http.Handler {
 		if token == "" {
 			// If we get here, the required token is missing
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
 		}
 
 		// Now parse the token
-		parsedToken, err := jwt.Parse(token, a.getToken)
+		parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+			// Don't forget to validate the alg is what you expect:
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				msg := fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				return nil, msg
+			}
+			return a.encryptionKey, nil
+		})
 		if err != nil {
-			// Could not parse the token
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			http.Error(w, "Error parsing token", http.StatusUnauthorized)
+			return
 		}
 
-		if jwt.SigningMethodHS256.Alg() != parsedToken.Header["alg"] {
-			// Could not validate token algorithm
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		// Check token is valid
+		if parsedToken != nil && parsedToken.Valid {
+			// Everything worked! Set the user in the context.
+			context.Set(r, "user", parsedToken)
+			next.ServeHTTP(w, r)
+			fmt.Println("test")
 		}
 
-		if !parsedToken.Valid {
-			// Token is invalid
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		}
-
-		// Everything worked! Set the user in the context.
-		context.Set(r, "user", parsedToken)
-
-		next.ServeHTTP(w, r)
+		// Token is invalid
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
 	})
 }
 
@@ -105,6 +106,7 @@ func (a *API) Authorize(permissions ...services.Permission) func(next http.Handl
 			for _, permission := range permissions {
 				if err := a.AclService.CheckPermission(user, permission); err != nil {
 					http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+					return
 				}
 			}
 
