@@ -1,4 +1,4 @@
-# GO Secure Example Application (GOSEA)
+# Go Secure Example Application (GOSEA)
 
 ## Install
 ```
@@ -8,5 +8,5 @@ Follow the instructions when you are prompted, in order to create a self signed 
 
 ## Run
 ```
-gosea
+make run
 ```
