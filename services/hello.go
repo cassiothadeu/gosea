@@ -1,7 +1,5 @@
 package services
 
-import "net/http"
-
 // HelloService provides a SayHello method
 type HelloService interface {
 	SayHello() string
@@ -13,7 +11,6 @@ func NewHelloService() HelloService {
 }
 
 type helloService struct {
-	H func(http.ResponseWriter, *http.Request)
 }
 
 // SayHello says hello for the hello service
